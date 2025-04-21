@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Image, TextInput } from 'reac
 import { Picker } from '@react-native-picker/picker';
 import DropDownPicker from 'react-native-dropdown-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import StepIndicator from '../components/StepIndicator';
 export default function Register2({ navigation }) {
   const [firstname, setFirstName] = React.useState('');
   const [lastname, setLastName] = React.useState('');
@@ -41,12 +41,12 @@ export default function Register2({ navigation }) {
   
   const countryOptions = [
     { label: 'India', value: 'IN' },
-    { label: 'USA', value: 'US' },
+    //{ label: 'USA', value: 'US' },
   ];
 
   const stateOptions = {
     IN: [
-      { label: 'Delhi', value: 'delhi' },
+      { label: 'Punjab', value: 'punjab' },
       { label: 'Maharashtra', value: 'maharashtra' },
       { label: 'Karnataka', value: 'karnataka' },
       { label: 'Himachal Pradesh', value: 'himachal' },
@@ -63,7 +63,7 @@ export default function Register2({ navigation }) {
   const [errors, setErrors] = useState({
     country: '',
     state: '',
-    city: '',
+    //city: '',
     pincode: ''
   });
 
@@ -80,7 +80,7 @@ export default function Register2({ navigation }) {
     // Reset errors
     newErrors.country = '';
     newErrors.state = '';
-    newErrors.city = '';
+    //newErrors.city = '';
     newErrors.pincode = '';
 
     // Validation
@@ -93,10 +93,10 @@ export default function Register2({ navigation }) {
       valid = false;
     }
 
-    if (!city) {
-      newErrors.city = 'City is required';
-      valid = false;
-    }
+    // if (!city) {
+    //   newErrors.city = 'City is required';
+    //   valid = false;
+    // }
 
     if (!pincode) {
       newErrors.pincode = 'Pincode is required';
@@ -105,7 +105,7 @@ export default function Register2({ navigation }) {
 
     // If valid, proceed
     if (valid) {
-      navigation.navigate('StepThree', { firstname, lastname, dob, Gender, country, state, city, pincode });
+      navigation.navigate('StepThree', { firstname, lastname, dob, Gender, country, state, pincode });
     } else {
       setErrors(newErrors);
     }
@@ -113,14 +113,17 @@ export default function Register2({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Image
-        style={styles.logo}
-        source={require('../assets/images/chago-logo.svg')}
-      />
-      <Text style={styles.title_1}>Register for account of three steps</Text>
+       <Image
+             style={styles.logo}
+             source={require('../assets/images/logo_signup.png')}
+           />
+      {/* <Text style={styles.title_1}>Register for account of three steps</Text> */}
       <Text style={styles.title}>Step-2</Text>
 
       {/* Country Dropdown */}
+      <Text style={styles.label}>
+      Country <Text style={{ color: "red" , textAlign:'left'}}>*</Text>
+            </Text>
       <View style={styles.pickerContainer}>
         <Picker
           selectedValue={country}
@@ -136,6 +139,10 @@ export default function Register2({ navigation }) {
       {errors.country ? <Text style={styles.errorText}>{errors.country}</Text> : null}
 
       {/* State Dropdown */}
+      {/* state label */}
+      <Text style={styles.label}>
+      State <Text style={{ color: "red" , textAlign:'left'}}>*</Text>
+            </Text>
       <View style={styles.pickerContainer}>
         <DropDownPicker
           open={stateOpen}
@@ -154,14 +161,18 @@ export default function Register2({ navigation }) {
       </View>
       {errors.state ? <Text style={styles.errorText}>{errors.state}</Text> : null}
 
-      <TextInput
+      {/* <TextInput
         style={styles.input}
         placeholder="City"
         value={city}
         onChangeText={setCity}
       />
-      {errors.city ? <Text style={styles.errorText}>{errors.city}</Text> : null}
-
+      {errors.city ? <Text style={styles.errorText}>{errors.city}</Text> : null} */}
+       
+       {/* Pincode input field */}
+       <Text style={styles.label}>
+      Pin Code <Text style={{ color: "red" , textAlign:'left'}}>*</Text>
+            </Text>
       <TextInput
         style={styles.input}
         placeholder="Pin Code"
@@ -173,6 +184,7 @@ export default function Register2({ navigation }) {
       <TouchableOpacity style={styles.button} onPress={handleNext}>
         <Text style={styles.buttonText}>Next</Text>
       </TouchableOpacity>
+      <StepIndicator currentStep={2} />
     </View>
   );
 }
@@ -181,7 +193,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    justifyContent: 'center',
+   justifyContent: 'flex-start',
     alignItems: 'center',
     backgroundColor: 'rgb(232, 245, 255)',
   },
@@ -196,6 +208,14 @@ const styles = StyleSheet.create({
     marginBottom: 90,
     textAlign: 'center',
     fontWeight: '400',
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#000",
+    textAlign: "left",  // Ensures the text is left-aligned
+    width: "100%",      // Makes sure the label takes full width
+    marginBottom: 5,
   },
   title: {
     color: '#378CCF',

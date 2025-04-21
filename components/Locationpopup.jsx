@@ -1,5 +1,5 @@
 import React, { useState , useEffect} from "react";
-import { Modal, View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, ActivityIndicator } from "react-native";
+import { Modal, View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, ActivityIndicator, Image } from "react-native";
 import * as Location from "expo-location";
 import axios from "axios";
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -12,16 +12,23 @@ export default function Locationpopup({  onLocationSelect }) {
   const [searchResults, setSearchResults] = useState([]);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [loading , setLoading] = useState(false);
- 
-
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalMessage, setModalMessage] = useState('')
+  const [isSearchVisible, setIsSearchVisible] = useState(false);
   const MAPPLS_API_KEY = "fd4b6fb189aa4528df8950ecf5692bb8";
 
+
+
+
+  
   // Get the current location of the user
   const getLocation = async () => {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        alert("Permission to access location was denied");
+        setModalMessage("Permission to access location was denied")
+        setModalVisible(true)
+        //alert("Permission to access location was denied");
         return;
       }
 
@@ -51,8 +58,10 @@ export default function Locationpopup({  onLocationSelect }) {
       setLongitude(longitude);
       setVisible(false);
     } catch (error) {
-      console.error(error);
-      alert("Failed to get location");
+      //console.error(error);
+      //alert("Failed to get location");
+      setModalMessage("Failed To Get the Location, Please Try Again..")
+      setModalVisible(true)
     }
   };
 
@@ -108,9 +117,36 @@ export default function Locationpopup({  onLocationSelect }) {
       >
         <View style={styles.modalBackground}> 
           <View style={styles.modalContainer}>
-            <Text style={styles.modalText}>Select Location</Text>
+            <View style={styles.imageContainer}>
+               <Image
+                 source={require('../assets/images/Location.png')}
+                  style={styles.icon}
+                  contentFit="cover"
+                  />
+            </View>
+            <Text style={styles.modalTextHeading}>What is Your Location?</Text>
+            <Text style={styles.subcopy}>To Find Nearby Service Provider.</Text>
+
+            {/* Button to use the current location */}
+           {!isSearchVisible && (
+            <>
+                <TouchableOpacity
+              style={styles.closeButton}
+              onPress={getLocation} // Use current location
+            >
+              <Text style={styles.buttonText}>Allow Location Access</Text>
+            </TouchableOpacity>
+
+            </>
+           )}
 
             {/* Search Bar */}
+            <TouchableOpacity  onPress={() => setIsSearchVisible(true)}>
+            <Text style={styles.manualLocationText}>Enter Location Manually</Text>
+          </TouchableOpacity>
+          
+          {isSearchVisible && (
+            <>
             <TextInput
               style={styles.searchInput}
               placeholder="Search location..."
@@ -140,14 +176,8 @@ export default function Locationpopup({  onLocationSelect }) {
               />
             )}
 
-            {/* Button to use the current location */}
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={getLocation} // Use current location
-            >
-              <Text style={styles.buttonText}>Use My Current Location</Text>
-            </TouchableOpacity>
-
+            </>
+          )}
           
             {selectedLocation && (
               <View style={styles.locationInfo}>
@@ -156,6 +186,21 @@ export default function Locationpopup({  onLocationSelect }) {
                 </Text>
               </View>
             )}
+          </View>
+        </View>
+      </Modal>
+
+
+      {/* Access Location Denied.. */}
+        <Modal visible={modalVisible} transparent animationType="fade">
+        <View style={styles.modalContainer1}>
+          <View style={styles.modalContent1}>
+            <Text style={styles.modalText}>{modalMessage}</Text>
+            <View style={styles.modalButtons}>
+              <TouchableOpacity style={styles.cancelButton} onPress={() => setModalVisible(false)}>
+                <Text style={styles.buttonText}>Close</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -183,23 +228,28 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
   },
-  modalText: {
+  imageContainer:{marginBottom:20},
+  icon:{height:60, width:60},
+  modalTextHeading: {
     color: "#000",
     fontSize: 18,
-    marginBottom: 20,
+    marginBottom: 7,
     fontWeight: "700",
     textAlign:'center'
   },
+  subcopy:{marginBottom:10, fontSize:12, fontWeight:400},
   loader: {
     marginBottom:30,
     marginLeft:30
   },
   closeButton: {
-    marginTop:30,
+    marginTop:10,
+    marginBottom:20,
     backgroundColor: "#378ccf",
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 20,
+    width:'100%'
    
   },
   buttonText: {
@@ -207,6 +257,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: "center",
   },
+  manualLocationText:{fontSize:14, fontWeight:400},
   searchInput: {
     width: 250,
     height: 40,
@@ -214,6 +265,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 8,
     paddingLeft: 10,
+    marginTop:10
   
   },
   locationInfo: {
@@ -237,4 +289,9 @@ const styles = StyleSheet.create({
   resultText: {
     fontSize: 16,
   },
+  modalContainer1: {flex: 1,justifyContent: 'center',alignItems: 'center',backgroundColor: 'rgba(0, 0, 0, 0.5)',},
+  modalContent1: {width: 300,padding: 50,backgroundColor: '#fff',borderRadius: 10,alignItems: 'center',},
+  modalText: {fontSize: 18,marginBottom: 20,textAlign: 'center',},
+  modalButtons: {flexDirection: 'row',justifyContent: 'space-between',width: '100%',},
+  cancelButton: {flex: 1,backgroundColor: 'gray',padding: 10,borderRadius: 5,marginRight: 10,alignItems: 'center',},
 });

@@ -85,9 +85,9 @@ export default function ResetPassword() {
       <TouchableOpacity style={styles.button} onPress={handleResetPassword}>
         <Text style={styles.buttonText}>Reset My Password</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.button} onPress={() => router.push('/')}>
+      {/* <TouchableOpacity style={styles.button} onPress={() => router.push('/')}>
       <Text style={styles.buttonText}>Back to home</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
      </ImageBackground>
     </View>
     

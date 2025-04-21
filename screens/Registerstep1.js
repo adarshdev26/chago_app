@@ -1,4 +1,4 @@
-import React from 'react';
+import React,{useState} from 'react';
 import {
   View,
   Text,
@@ -10,18 +10,20 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Picker } from '@react-native-picker/picker';
+import StepIndicator from '../components/StepIndicator';
 
 export default function Register1({ navigation }) {
   const [firstName, setFirstName] = React.useState('');
   const [lastName, setLastName] = React.useState('');
   const [dateOfBirth, setDateOfBirth] = React.useState('');
   const [gender, setGender] = React.useState('');
+  const [currentStep, setCurrentStep] = useState(1);
 
   // Error messages
   const [errors, setErrors] = React.useState({
     firstName: '',
     lastName: '',
-    dateOfBirth: '',
+    //dateOfBirth: '',
     gender: '',
   });
 
@@ -32,7 +34,7 @@ export default function Register1({ navigation }) {
     // Reset errors
     newErrors.firstName = '';
     newErrors.lastName = '';
-    newErrors.dateOfBirth = '';
+    //newErrors.dateOfBirth = '';
     newErrors.gender = '';
 
     // Validation for empty fields
@@ -46,24 +48,24 @@ export default function Register1({ navigation }) {
       valid = false;
     }
 
-    if (!dateOfBirth) {
-      newErrors.dateOfBirth = 'Date of birth is required';
-      valid = false;
-    } else {
-      // Validate date format (YYYY-MM-DD)
-      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-      if (!dateRegex.test(dateOfBirth)) {
-        newErrors.dateOfBirth = 'Date of birth must be in YYYY-MM-DD format';
-        valid = false;
-      } else {
-        // Check if the date is a valid date
-        const dateObj = new Date(dateOfBirth);
-        if (isNaN(dateObj.getTime())) {
-          newErrors.dateOfBirth = 'Invalid date';
-          valid = false;
-        }
-      }
-    }
+    // if (!dateOfBirth) {
+    //   newErrors.dateOfBirth = 'Date of birth is required';
+    //   valid = false;
+    // } else {
+    //   // Validate date format (YYYY-MM-DD)
+    //   const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    //   if (!dateRegex.test(dateOfBirth)) {
+    //     newErrors.dateOfBirth = 'Date of birth must be in YYYY-MM-DD format';
+    //     valid = false;
+    //   } else {
+    //     // Check if the date is a valid date
+    //     const dateObj = new Date(dateOfBirth);
+    //     if (isNaN(dateObj.getTime())) {
+    //       newErrors.dateOfBirth = 'Invalid date';
+    //       valid = false;
+    //     }
+    //   }
+    // }
 
     if (!gender) {
       newErrors.gender = 'Gender is required';
@@ -75,9 +77,11 @@ export default function Register1({ navigation }) {
     // If all fields are valid, proceed to the next step
     if (valid) {
       try {
+        if (currentStep < 3) setCurrentStep(currentStep + 1);
         await AsyncStorage.setItem(
           'registrationStep1',
-          JSON.stringify({ firstName, lastName, dateOfBirth, gender })
+          //JSON.stringify({ firstName, lastName, dateOfBirth, gender })
+          JSON.stringify({ firstName, lastName, gender })
         );
         navigation.navigate('StepTwo');
       } catch (error) {
@@ -87,6 +91,8 @@ export default function Register1({ navigation }) {
     }
   };
 
+
+
   return (
     <View style={styles.container}>
       <Image
@@ -94,6 +100,9 @@ export default function Register1({ navigation }) {
         source={require('../assets/images/logo_signup.png')}
       />
       <Text style={styles.title}>Step-1</Text>
+      <Text style={styles.label}>
+        First Name <Text style={{ color: "red" , textAlign:'left'}}>*</Text>
+      </Text>
       <TextInput
         style={styles.input}
         placeholder="First Name"
@@ -104,6 +113,9 @@ export default function Register1({ navigation }) {
         <Text style={styles.errorText}>{errors.firstName}</Text>
       ) : null}
 
+     <Text style={styles.label}>
+        Last Name <Text style={{ color: "red" , textAlign:'left'}}>*</Text>
+      </Text>
       <TextInput
         style={styles.input}
         placeholder="Last Name"
@@ -114,7 +126,7 @@ export default function Register1({ navigation }) {
         <Text style={styles.errorText}>{errors.lastName}</Text>
       ) : null}
 
-      <TextInput
+      {/* <TextInput
         style={styles.input}
         placeholder="Date of Birth"
         value={dateOfBirth}
@@ -122,9 +134,12 @@ export default function Register1({ navigation }) {
       />
       {errors.dateOfBirth ? (
         <Text style={styles.errorText}>{errors.dateOfBirth}</Text>
-      ) : null}
+      ) : null} */}
 
       {/* Gender Dropdown */}
+      <Text style={styles.label}>
+        Gender <Text style={{ color: "red" , textAlign:'left'}}>*</Text>
+      </Text>
       <View style={styles.pickerContainer}>
         <Picker
           selectedValue={gender}
@@ -143,6 +158,7 @@ export default function Register1({ navigation }) {
       <TouchableOpacity style={styles.button} onPress={handleNext}>
         <Text style={styles.buttonText}>Next</Text>
       </TouchableOpacity>
+      <StepIndicator currentStep={1} />
     </View>
   );
 }
@@ -151,7 +167,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
     backgroundColor: 'rgb(232, 245, 255)',
   },
@@ -163,7 +179,8 @@ const styles = StyleSheet.create({
   title: {
     color: '#378CCF',
     fontSize: 20,
-    marginBottom: 33,
+    marginBottom: 20,
+    marginTop:20,
     textAlign: 'center',
     fontWeight: '700',
   },
@@ -177,6 +194,14 @@ const styles = StyleSheet.create({
     color: '#2B2B2B',
     fontWeight: '400',
     width: '100%',
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#000",
+    textAlign: "left",  // Ensures the text is left-aligned
+    width: "100%",      // Makes sure the label takes full width
+    marginBottom: 5,
   },
   pickerContainer: {
     width: '100%',

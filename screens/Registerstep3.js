@@ -1,6 +1,10 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, TextInput, Alert } from 'react-native';
+import React, { useState , useCallback} from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image, TextInput, Alert, Modal} from 'react-native';
 import { Redirect, router } from 'expo-router';
+import StepIndicator from '../components/StepIndicator';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {useFocusEffect } from "@react-navigation/native";
+
 export default function Register3({ navigation, route }) {
   const { firstname, lastname, dob, Gender, country, state, city, pincode } = route.params;
   const [email, setemail] = useState('');
@@ -9,14 +13,77 @@ export default function Register3({ navigation, route }) {
   const [confirmpass, setConfirmpass] = useState('');
   const [message, setMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [loading, setLoading] = useState(false);
   //const [showResult, setShowresult] = useState('')
+  const [modalVisible, setModalVisible] = useState(false);
    var role = 'subscriber';
+   
   const [errors, setErrors] = useState({
     email: '',
     phone: '',
     password: '',
     confirmpass: '',
   });
+
+
+    //logged in not able to back to login screen
+    useFocusEffect(
+      useCallback(() => {
+        const checkIfLogin = async () => {
+          try {
+            setLoading(true);
+            const userData = await AsyncStorage.getItem('logindetails');
+            if (userData) {
+              router.replace('/profile'); 
+            }
+          } catch (error) {
+            console.error('Error checking login status', error);
+          } finally {
+            setLoading(false);
+          }
+        };
+  
+        checkIfLogin();
+      }, [])
+    );
+
+
+  // handle login funciton..
+  const handleLogin = async () => {
+    try {
+      const response = await fetch('https://chago.in/wp-json/my-api/v1/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          identifier: email, // Using the same field for email or username...
+          password: password,
+        }),
+      });
+  
+      const data = await response.json();
+      if (response.ok) {
+        await AsyncStorage.setItem('logindetails', JSON.stringify(data));
+        const redirectUrl = await AsyncStorage.getItem('redirectAfterLogin');
+        const targetRoute = redirectUrl || '/Settings';
+  
+        setTimeout(async () => {
+          router.push(targetRoute);
+          await AsyncStorage.removeItem('redirectAfterLogin');
+        }, 1000);
+      } else {
+        setErrorMessage(data.message || 'Login failed. Please try again.');
+        setModalVisible(true);
+      }
+    } catch (error) {
+      console.error('Error during login:', error);
+      setErrorMessage('An unexpected error occurred. Please try again later.');
+      setModalVisible(true);
+    }
+  };
+  
+
 
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -35,7 +102,7 @@ export default function Register3({ navigation, route }) {
     newErrors.email = '';
     newErrors.password = '';
     newErrors.confirmpass = '';
-
+  
     // Email validation
     if (!email) {
       newErrors.email = 'Email is required';
@@ -70,11 +137,12 @@ export default function Register3({ navigation, route }) {
       newErrors.confirmpass = 'Passwords do not match';
       valid = false;
     }
-
+  
     setErrors(newErrors);
 
     // If valid, proceed
     if (valid) {
+      setLoading(true);
       try {
         const requestData = {
           firstname,
@@ -101,10 +169,9 @@ export default function Register3({ navigation, route }) {
 
         const data = await response.json();
         if (response.ok) {
-          setMessage(data.message)
-          setTimeout(() => {
-            router.push('/signin')
-          },2000);
+          setMessage(data.message);
+          await handleLogin();
+          setModalVisible(true);
         }
         else{
           setErrorMessage(data.message)
@@ -118,24 +185,23 @@ export default function Register3({ navigation, route }) {
     }
   };
 
-  if(errorMessage) {
-    return <Text style={styles.errorText}>{errorMessage}</Text>
-  }
 
-  if(message) {
-    return <Text style={styles.message}>{message}</Text>
+  const handleClose = () => {
+    setModalVisible(false)
   }
-
   return (
     <View style={styles.container}>
       <Image
-        style={styles.logo}
-        source={require('../assets/images/chago-logo.svg')}
-      />
-      <Text>{message}</Text>
-      <Text style={styles.title_1}>Register for account of three steps</Text>
+            style={styles.logo}
+            source={require('../assets/images/logo_signup.png')}
+          />
+      {/* <Text style={styles.title_1}>Register for account of three steps</Text> */}
       <Text style={styles.title}>Step-3</Text>
-
+      
+      {/* Email Label */}
+      <Text style={styles.label}>
+        Email <Text style={{ color: "red" , textAlign:'left'}}>*</Text>
+              </Text>
       {/* Email Input */}
       <TextInput
         style={styles.input}
@@ -147,16 +213,25 @@ export default function Register3({ navigation, route }) {
       />
       {errors.email ? <Text style={styles.errorText}>{errors.email}</Text> : null}
 
+        {/* Phone Label */}
+      <Text style={styles.label}>
+       Mobile No <Text style={{ color: "red" , textAlign:'left'}}>*</Text>
+        </Text>
         {/* Phone Input */}
         <TextInput
         style={styles.input}
-        placeholder="Phone"
+        placeholder="Mobile No"
         value={phone}
         onChangeText={setPhone}
         autoCapitalize="none"
         keyboardType="numeric" 
       />
       {errors.phone ? <Text style={styles.errorText}>{errors.phone}</Text> : null}
+
+        {/* Password Label */}
+        <Text style={styles.label}>
+       Password <Text style={{ color: "red" , textAlign:'left'}}>*</Text>
+        </Text>
       {/* Password Input */}
       <TextInput
         style={styles.input}
@@ -167,6 +242,10 @@ export default function Register3({ navigation, route }) {
       />
       {errors.password ? <Text style={styles.errorText}>{errors.password}</Text> : null}
 
+       {/*Confirm Password Label */}
+       <Text style={styles.label}>
+       Confirm Password <Text style={{ color: "red" , textAlign:'left'}}>*</Text>
+        </Text>
       {/* Confirm Password Input */}
       <TextInput
         style={styles.input}
@@ -177,10 +256,48 @@ export default function Register3({ navigation, route }) {
       />
       {errors.confirmpass ? <Text style={styles.errorText}>{errors.confirmpass}</Text> : null}
 
-      <TouchableOpacity style={styles.button} onPress={handleNext}>
-        <Text style={styles.buttonText}>Submit</Text>
+      <TouchableOpacity 
+      style={styles.button} 
+      onPress={handleNext}
+      disabled={loading}
+      >
+        <Text style={styles.buttonText}>{loading ? 'Submitting...' : 'Submit'}</Text>
       </TouchableOpacity>
+
+      <StepIndicator currentStep={3} />
      
+
+     {/* Login first Confirmation Modal */}
+     {message && (
+  <Modal visible={modalVisible} transparent animationType="fade">
+    <View style={styles.modalContainer}>
+      <View style={styles.modalContent}>
+        <Text style={styles.modalText}>{message}</Text>
+        <View style={styles.modalButtons}>
+          <TouchableOpacity style={styles.confirmButton} onPress={handleClose}>
+            <Text style={styles.buttonText}>Ok</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </View>
+  </Modal>
+)}
+
+{errorMessage && (
+  <Modal visible={modalVisible} transparent animationType="fade">
+    <View style={styles.modalContainer}>
+      <View style={styles.modalContent}>
+        <Text style={styles.modalText}>{errorMessage}</Text>
+        <View style={styles.modalButtons}>
+          <TouchableOpacity style={styles.confirmButton} onPress={handleClose}>
+            <Text style={styles.buttonText}>Ok</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </View>
+  </Modal>
+)}
+
     </View>
   );
 }
@@ -189,7 +306,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
     backgroundColor: 'rgb(232, 245, 255)',
   },
@@ -205,10 +322,18 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: '400',
   },
+  label: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#000",
+    textAlign: "left",  // Ensures the text is left-aligned
+    width: "100%",      // Makes sure the label takes full width
+    marginBottom: 5,
+  },
   title: {
     color: '#378CCF',
     fontSize: 20,
-    marginBottom: 33,
+    marginBottom: 10,
     textAlign: 'center',
     fontWeight: '700',
   },
@@ -247,8 +372,12 @@ const styles = StyleSheet.create({
   message:{
     color:'red'
   },
-  errorText: {
-    color:'red',
-    fontSize:22
-  }
+  modalContainer: {flex: 1,justifyContent: 'center',alignItems: 'center',backgroundColor: 'rgba(0, 0, 0, 0.5)',},
+  modalContent: {width: 300,padding: 20,backgroundColor: '#fff',borderRadius: 10,alignItems: 'center',},
+  modalText: {fontSize: 18,marginBottom: 20,textAlign: 'center',},
+  modalButtons: {flexDirection: 'row',justifyContent: 'space-between',width: '100%',},
+  cancelButton: {flex: 1,backgroundColor: 'gray',padding: 10,borderRadius: 5,marginRight: 10,alignItems: 'center',},
+  confirmButton: {flex: 1,backgroundColor: 'green',padding: 10,borderRadius: 5,alignItems: 'center',},
+ 
+
 });

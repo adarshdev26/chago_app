@@ -51,24 +51,9 @@ const Profiledetails = () => {
 
 
 
-
-  const handleLogout = async () => {
-    try {
-      await AsyncStorage.removeItem('logindetails'); // Clear stored data
-      //setUsername(null); // Reset state
-      console.log('Logged out successfully.');
-      setTimeout(() => {
-        router.push('/');
-      }, 1000);
-    } catch (error) {
-      console.error('Error clearing AsyncStorage', error);
-    }
-  };
-
-
   
   const handleChangepassword =  () => {
-   router.push('/change-password')
+   router.push('/resetpassword')
   };
   
 
@@ -119,25 +104,11 @@ const Profiledetails = () => {
               <Text style={styles.value}>{userDetails.state}</Text>
             </View>
 
-            {/* <TouchableOpacity>
-            <Text style={styles.label}>Change Password</Text>
-          </TouchableOpacity> */}
-
-
-
           </View>
 
-    
-
-        
           <TouchableOpacity style={styles.changePassword} onPress={handleChangepassword}>
             <Text style={styles.logoutButtonText}>Change Password</Text>
           </TouchableOpacity>
-
-            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-            <Text style={styles.logoutButtonText}>Logout</Text>
-          </TouchableOpacity>
-
         </>
       ) : (
         <Text style={styles.text}>
