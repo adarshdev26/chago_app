@@ -16,7 +16,7 @@ const Profiledetails = () => {
     pincode:null,
     state:null,
   });
-  const [Error, setError] = useState('');
+  //const [Error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
 

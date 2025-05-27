@@ -2,7 +2,9 @@ import { TouchableOpacity, Text, Image, StyleSheet, FlatList, View , Modal, Text
 import React, { useEffect, useState } from "react";
 import { MaterialIcons } from '@expo/vector-icons'; 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
 const Getreview = ({ props }) => {
+
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
   const [showAll, setShowAll] = useState(false); 
@@ -12,41 +14,40 @@ const Getreview = ({ props }) => {
   const [resetmessage, setResetmessage] = useState('');
   const [error, setError] = useState("");
   const [email, setEmail] = useState('');
-  const [name, setName] = useState('')
+  const [name, setName] = useState('');
+  const [bearerToken, setBearerToken] = useState(null)
   const productId = props;
 
-  useEffect(() => {
-    const fetchreviews = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch("https://chago.in/wp-json/my-api/v1/get_reviews/", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ product_id: productId }),
-        });
-
-        const result = await response.json();
-
-        if (response.ok) {
-          if (result.success === true) {
-            setData(result.data);
-          } else {
-            console.error(result.message);
-          }
-        } else {
-          console.error("Failed to fetch product details.");
-        }
-      } catch (err) {
-        console.error(err.message);
-      } finally {
-        setLoading(false);
+  const fetchReviews = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch("https://chago.in/wp-json/my-api/v1/get_reviews/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ product_id: productId }),
+      });
+  
+      const result = await response.json();
+  
+      if (response.ok && result.success === true && Array.isArray(result.data)) {
+        setData(result.data);
+      } else {
+        console.error(result.message || "Failed to load reviews.");
       }
-    };
+    } catch (err) {
+      console.error(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchreviews();
+  
+  useEffect(() => {
+    fetchReviews();
   }, [productId]);
+  
 
 
   // session storage data
@@ -58,7 +59,8 @@ const Getreview = ({ props }) => {
         if (data !== null) {
           const result = JSON.parse(data);
           setEmail(result.data.email);
-          setName(result.data.firstname)
+          setName(result.data.firstname);
+          setBearerToken(result.data.token)
         }
       } catch (error) {
        
@@ -72,47 +74,48 @@ const Getreview = ({ props }) => {
 
 
   // write review api
-  const submitReviewhandler = async ()=> {
+  const submitReviewhandler = async () => {
     if (reviewText.trim() === "") {
       setError("Review cannot be empty.");
-    } else {
-      setError(""); 
-      try {
-        setLoading(true);
-        const response = await fetch("https://chago.in/wp-json/my-api/v1/write_review/", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer faketoken",
-          },
-          body: JSON.stringify({ 
+      return;
+    }
+  
+    setError("");
+    try {
+      setLoading(true);
+      const response = await fetch("https://chago.in/wp-json/my-api/v1/write_review/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${bearerToken}`, // NOTE: space after 'Bearer'
+        },
+        body: JSON.stringify({
           product_id: productId,
           review_content: reviewText,
-          review_rating  :selectedStars,
-          reviewer_email : email,
-          review_name :name
-          }),
-        });
-
-        const result = await response.json();
-
-        if (response.ok) {
-          if (result.success === true) {
-            setResetmessage(result.message);
-            setModalVisible(false);
-          } else {
-            console.error(result.message);
-          }
-        } else {
-          console.error("Failed to fetch product details.");
-        }
-      } catch (err) {
-        console.error(err.message);
-      } finally {
-        setLoading(false);
+          review_rating: selectedStars,
+          reviewer_email: email,
+          review_name: name,
+        }),
+      });
+  
+      const result = await response.json();
+  
+      if (response.ok && result.success === true) {
+        setResetmessage(result.message);
+        setModalVisible(false);
+        setReviewText(""); // reset form
+        setSelectedStars(0); // reset stars if needed
+        fetchReviews(); // 🔁 fetch the latest reviews here
+      } else {
+        console.error(result.message || "Review submission failed.");
       }
+    } catch (err) {
+      console.error(err.message);
+    } finally {
+      setLoading(false);
     }
-    };
+  };
+  
   
 
   const renderItem = ({ item }) => (
@@ -155,17 +158,31 @@ const Getreview = ({ props }) => {
             >
               <Text style={styles.seeAllButtonText}>{showAll ? "View Less" : "View All"}</Text>
             </TouchableOpacity>
-
+{/* 
             <TouchableOpacity style={styles.writereview}  onPress={() => setModalVisible(true)}>
               <Text style={styles.seeAllreview}>
                 Write a review
               </Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
            </View>
          
 
             {/* modal */}
-     {/* Modal */}
+
+           </>
+          )} 
+        </>
+      ) : (
+        <Text style={{textAlign:'center', marginVertical:15}}>No reviews available.</Text>
+      )}
+
+          <TouchableOpacity style={styles.writereview}  onPress={() => setModalVisible(true)}>
+              <Text style={styles.seeAllreview}>
+                Write a review
+              </Text>
+            </TouchableOpacity>
+
+                 {/* Modal */}
     <Modal
       animationType="slide"
       transparent={true}
@@ -228,12 +245,7 @@ const Getreview = ({ props }) => {
   </View>
 </Modal>
 
-           </>
-          )}
-        </>
-      ) : (
-        <Text>No reviews available.</Text>
-      )}
+
     </>
   );
 };
@@ -314,11 +326,14 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   writereview:{
-    backgroundColor:'red',
+    width: '80%',
+    alignSelf:'center',
+    backgroundColor:'#3032a2',
     padding:10,
     borderRadius: 8,
-    marginTop: 8,
+    margin:5,
     alignItems: "center",
+
    
   },
   seeAllreview: {

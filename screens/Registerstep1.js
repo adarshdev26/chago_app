@@ -1,4 +1,4 @@
-import React,{useState} from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -43,10 +43,10 @@ export default function Register1({ navigation }) {
       valid = false;
     }
 
-    if (!lastName) {
-      newErrors.lastName = 'Last name is required';
-      valid = false;
-    }
+    // if (!lastName) {
+    //   newErrors.lastName = 'Last name is required';
+    //   valid = false;
+    // }
 
     // if (!dateOfBirth) {
     //   newErrors.dateOfBirth = 'Date of birth is required';
@@ -101,7 +101,7 @@ export default function Register1({ navigation }) {
       />
       <Text style={styles.title}>Step-1</Text>
       <Text style={styles.label}>
-        First Name <Text style={{ color: "red" , textAlign:'left'}}>*</Text>
+        First Name <Text style={{ color: "red", textAlign: 'left' }}>*</Text>
       </Text>
       <TextInput
         style={styles.input}
@@ -113,8 +113,8 @@ export default function Register1({ navigation }) {
         <Text style={styles.errorText}>{errors.firstName}</Text>
       ) : null}
 
-     <Text style={styles.label}>
-        Last Name <Text style={{ color: "red" , textAlign:'left'}}>*</Text>
+      <Text style={styles.label}>
+        Last Name <Text style={{ color: "red", textAlign: 'left' }}></Text>
       </Text>
       <TextInput
         style={styles.input}
@@ -138,7 +138,7 @@ export default function Register1({ navigation }) {
 
       {/* Gender Dropdown */}
       <Text style={styles.label}>
-        Gender <Text style={{ color: "red" , textAlign:'left'}}>*</Text>
+        Gender <Text style={{ color: "red", textAlign: 'left' }}>*</Text>
       </Text>
       <View style={styles.pickerContainer}>
         <Picker
@@ -149,6 +149,7 @@ export default function Register1({ navigation }) {
           <Picker.Item label="Select Gender" value="" />
           <Picker.Item label="Male" value="male" />
           <Picker.Item label="Female" value="female" />
+          <Picker.Item label="Other" value="other" />
         </Picker>
       </View>
       {errors.gender ? (
@@ -180,7 +181,7 @@ const styles = StyleSheet.create({
     color: '#378CCF',
     fontSize: 20,
     marginBottom: 20,
-    marginTop:20,
+    marginTop: 20,
     textAlign: 'center',
     fontWeight: '700',
   },

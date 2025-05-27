@@ -6,6 +6,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useFocusEffect } from "@react-navigation/native";
 
 export default function Register3({ navigation, route }) {
+
+   const [expotoken, setExpotoken] = useState('');
+
   const { firstname, lastname, dob, Gender, country, state, city, pincode } = route.params;
   const [email, setemail] = useState('');
   const [phone, setPhone] = useState('');
@@ -33,6 +36,9 @@ export default function Register3({ navigation, route }) {
           try {
             setLoading(true);
             const userData = await AsyncStorage.getItem('logindetails');
+            const expotoken =  await AsyncStorage.getItem('expoPushToken');
+            setExpotoken(expotoken);
+            console.log(expotoken , 'this is token...')
             if (userData) {
               router.replace('/profile'); 
             }
@@ -59,6 +65,7 @@ export default function Register3({ navigation, route }) {
         body: JSON.stringify({
           identifier: email, // Using the same field for email or username...
           password: password,
+          token:expotoken
         }),
       });
   
@@ -156,7 +163,8 @@ export default function Register3({ navigation, route }) {
           email,
           phone,
           password,
-          role
+          role,
+          token:expotoken
         };
 
         const response = await fetch('https://chago.in/wp-json/my-api/v1/signup/', {

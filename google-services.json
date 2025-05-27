@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "118873851597",
+    "project_id": "chago-4626d",
+    "storage_bucket": "chago-4626d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:118873851597:android:6811e9fdfed1890574cb84",
+        "android_client_info": {
+          "package_name": "com.adarshdev.chagoapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCPTXbyNkoegXbVIJI1zCs5UKYIUu_qmPA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -4,7 +4,11 @@ import { Picker } from '@react-native-picker/picker';
 import DropDownPicker from 'react-native-dropdown-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import StepIndicator from '../components/StepIndicator';
+
+
 export default function Register2({ navigation }) {
+
+  
   const [firstname, setFirstName] = React.useState('');
   const [lastname, setLastName] = React.useState('');
   const [dob, setdob] = React.useState('');
@@ -12,7 +16,7 @@ export default function Register2({ navigation }) {
   const [country, setCountry] = useState(null);
   const [state, setState] = useState(null);
   const [stateOpen, setStateOpen] = useState(false);
-  const [city, setCity] = useState();
+  //const [city, setCity] = useState();
   const [pincode, setPincode] = useState();
 
 
@@ -34,11 +38,11 @@ export default function Register2({ navigation }) {
         console.error('Failed to retrieve registration data:', error);
       }
     };
-  
+
     fetchData();
   }, []);
-  
-  
+
+
   const countryOptions = [
     { label: 'India', value: 'IN' },
     //{ label: 'USA', value: 'US' },
@@ -46,10 +50,44 @@ export default function Register2({ navigation }) {
 
   const stateOptions = {
     IN: [
-      { label: 'Punjab', value: 'punjab' },
-      { label: 'Maharashtra', value: 'maharashtra' },
+      { label: 'Andhra Pradesh', value: 'andhra_pradesh' },
+      { label: 'Arunachal Pradesh', value: 'arunachal_pradesh' },
+      { label: 'Assam', value: 'assam' },
+      { label: 'Bihar', value: 'bihar' },
+      { label: 'Chhattisgarh', value: 'chhattisgarh' },
+      { label: 'Goa', value: 'goa' },
+      { label: 'Gujarat', value: 'gujarat' },
+      { label: 'Haryana', value: 'haryana' },
+      { label: 'Himachal Pradesh', value: 'himachal_pradesh' },
+      { label: 'Jharkhand', value: 'jharkhand' },
       { label: 'Karnataka', value: 'karnataka' },
-      { label: 'Himachal Pradesh', value: 'himachal' },
+      { label: 'Kerala', value: 'kerala' },
+      { label: 'Madhya Pradesh', value: 'madhya_pradesh' },
+      { label: 'Maharashtra', value: 'maharashtra' },
+      { label: 'Manipur', value: 'manipur' },
+      { label: 'Meghalaya', value: 'meghalaya' },
+      { label: 'Mizoram', value: 'mizoram' },
+      { label: 'Nagaland', value: 'nagaland' },
+      { label: 'Odisha', value: 'odisha' },
+      { label: 'Punjab', value: 'punjab' },
+      { label: 'Rajasthan', value: 'rajasthan' },
+      { label: 'Sikkim', value: 'sikkim' },
+      { label: 'Tamil Nadu', value: 'tamil_nadu' },
+      { label: 'Telangana', value: 'telangana' },
+      { label: 'Tripura', value: 'tripura' },
+      { label: 'Uttar Pradesh', value: 'uttar_pradesh' },
+      { label: 'Uttarakhand', value: 'uttarakhand' },
+      { label: 'West Bengal', value: 'west_bengal' },
+    
+      // Union Territories
+      { label: 'Andaman and Nicobar Islands', value: 'andaman_nicobar' },
+      { label: 'Chandigarh', value: 'chandigarh' },
+      { label: 'Dadra and Nagar Haveli and Daman and Diu', value: 'dadra_nagar_haveli_daman_diu' },
+      { label: 'Delhi', value: 'delhi' },
+      { label: 'Jammu and Kashmir', value: 'jammu_kashmir' },
+      { label: 'Ladakh', value: 'ladakh' },
+      { label: 'Lakshadweep', value: 'lakshadweep' },
+      { label: 'Puducherry', value: 'puducherry' }
     ],
     US: [
       { label: 'California', value: 'california' },
@@ -69,7 +107,7 @@ export default function Register2({ navigation }) {
 
   const handleCountrySelect = (value) => {
     setCountry(value);
-    setState(null); 
+    setState(null);
     setStates(stateOptions[value] || []);
   };
 
@@ -113,17 +151,17 @@ export default function Register2({ navigation }) {
 
   return (
     <View style={styles.container}>
-       <Image
-             style={styles.logo}
-             source={require('../assets/images/logo_signup.png')}
-           />
+      <Image
+        style={styles.logo}
+        source={require('../assets/images/logo_signup.png')}
+      />
       {/* <Text style={styles.title_1}>Register for account of three steps</Text> */}
       <Text style={styles.title}>Step-2</Text>
 
       {/* Country Dropdown */}
       <Text style={styles.label}>
-      Country <Text style={{ color: "red" , textAlign:'left'}}>*</Text>
-            </Text>
+        Country <Text style={{ color: "red", textAlign: 'left' }}>*</Text>
+      </Text>
       <View style={styles.pickerContainer}>
         <Picker
           selectedValue={country}
@@ -141,8 +179,8 @@ export default function Register2({ navigation }) {
       {/* State Dropdown */}
       {/* state label */}
       <Text style={styles.label}>
-      State <Text style={{ color: "red" , textAlign:'left'}}>*</Text>
-            </Text>
+        State <Text style={{ color: "red", textAlign: 'left' }}>*</Text>
+      </Text>
       <View style={styles.pickerContainer}>
         <DropDownPicker
           open={stateOpen}
@@ -151,7 +189,7 @@ export default function Register2({ navigation }) {
           setOpen={setStateOpen}
           setValue={setState}
           placeholder="Select your state"
-          disabled={!states.length} 
+          disabled={!states.length}
           style={[
             styles.dropdown,
             !states.length && { backgroundColor: '#f0f0f0' },
@@ -168,11 +206,11 @@ export default function Register2({ navigation }) {
         onChangeText={setCity}
       />
       {errors.city ? <Text style={styles.errorText}>{errors.city}</Text> : null} */}
-       
-       {/* Pincode input field */}
-       <Text style={styles.label}>
-      Pin Code <Text style={{ color: "red" , textAlign:'left'}}>*</Text>
-            </Text>
+
+      {/* Pincode input field */}
+      <Text style={styles.label}>
+        Pin Code <Text style={{ color: "red", textAlign: 'left' }}>*</Text>
+      </Text>
       <TextInput
         style={styles.input}
         placeholder="Pin Code"
@@ -193,7 +231,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-   justifyContent: 'flex-start',
+    justifyContent: 'flex-start',
     alignItems: 'center',
     backgroundColor: 'rgb(232, 245, 255)',
   },
